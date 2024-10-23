@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khilji Dynasty MCQ Quiz</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Accommodate fixed elements */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Timer Styling */
+        .timer {
+            position: fixed;          /* Fixes the position relative to the viewport */
+            top: 20px;                /* Positions 20px from the top */
+            right: 20px;              /* Positions 20px from the right */
+            font-size: 1.5rem;        /* Sets a readable font size */
+            color: #d9534f;           /* Sets the text color (red) */
+            font-weight: bold;        /* Makes the text bold */
+            z-index: 1000;            /* Ensures the timer stays above other elements */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 10px 15px;       /* Adds padding around the timer text */
+            border-radius: 5px;       /* Rounds the corners of the timer box */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Adds a subtle shadow for depth */
+        }
+
+        /* Question Map Sidebar Styling */
+        .question-map {
+            position: fixed;          
+            top: 80px;                /* Positioned below the timer */
+            right: 20px;               /* Positioned on the right */
+            width: 180px;              /* Increased width to accommodate 5 columns */
+            background-color: rgba(255, 255, 255, 0.9); 
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;             
+            max-height: 90vh;         
+            overflow-y: auto;         
+        }
+
+        .question-map h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+
+        /* Update #questionLinks to Use CSS Grid */
+        #questionLinks {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 5px; /* Adjust the spacing between links as needed */
+            justify-items: center; /* Centers the links within each grid cell */
+        }
+
+        /* Adjust .question-map .question-link Styling */
+        .question-map .question-link {
+            padding: 5px 0; /* Reduces vertical padding */
+            font-size: 0.9rem; /* Slightly smaller font size for better fit */
+            width: 100%; /* Ensures the link takes the full width of the grid cell */
+            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+            border-radius: 4px; /* Maintains rounded corners */
+            text-align: center; /* Centers the text within the link */
+            background-color: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .question-map .question-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Add Correct and Incorrect Classes for Highlighting */
+        .question-map .question-link.correct {
+            background-color: #28a745; /* Green background */
+            color: #fff; /* White text */
+            border-color: #28a745; /* Green border */
+        }
+
+        .question-map .question-link.incorrect {
+            background-color: #dc3545; /* Red background */
+            color: #fff; /* White text */
+            border-color: #dc3545; /* Red border */
+        }
+
+        /* Add Attempted Class for Highlighting */
+        .question-map .question-link.attempted {
+            background-color: #17a2b8; /* Blue background for attempted questions */
+            color: #fff; /* White text */
+            border-color: #17a2b8; /* Blue border */
+        }
+
+        /* Submit Button and Score Styling */
+        .question-map .submit-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .question-map .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .question-map .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .question-map .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .question-map .result {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Quiz Container Styling */
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-right: 200px; /* Accommodates the question map sidebar on the right */
+            margin-top: 50px;     /* Maintains spacing from the top */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .options label:hover {
+            background-color: #e6f0ff;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #17a2b8;
+        }
+
+        /* Feedback Message Styling */
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .feedback.right {
+            color: #28a745; /* Green for correct answers */
+        }
+
+        .feedback.wrong {
+            color: #dc3545; /* Red for incorrect answers */
+        }
+
+        .feedback.not-attempted {
+            color: #6c757d; /* Gray for not attempted */
+        }
+
+        /* Alert when time is low */
+        .alert {
+            animation: blink 1s steps(5, start) infinite;
+        }
+
+        @keyframes blink {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin-right: 0; /* Removes right margin on small screens */
+            }
+
+            .question-map {
+                display: none; /* Hides the question map on small screens */
+            }
+
+            .toggle-question-map {
+                display: block; /* Shows toggle button on small screens */
+            }
+        }
+
+        /* Toggle Button for Question Map (Visible on Small Screens) */
+        .toggle-question-map {
+            position: fixed;
+            top: 20px;
+            right: 20px; /* Positioned on the right */
+            z-index: 1001;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none; /* Hidden by default */
+        }
+
+        /* Active State for Question Map on Small Screens */
+        .question-map.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Display -->
+    <div class="timer" id="timer">10:00</div>
+
+    <!-- Toggle Button for Question Map (Visible on Small Screens) -->
+    <button class="toggle-question-map" id="toggleQuestionMap">☰</button>
+
+    <!-- Question Map Sidebar -->
+    <div class="question-map" id="questionMap">
+        <h2>Question Map</h2>
+        <div id="questionLinks">
+            <!-- Question links will be injected here by JavaScript -->
+        </div>
+        <!-- Submit Button and Score Display Below the Question Links -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="quiz-container">
+        <h1>Khilji Dynasty MCQ Quiz</h1>
+        
+        <form id="quizForm">
+            <!-- Questions will be injected here by JavaScript -->
+        </form>
+
+        <!-- Submit Button and Score Display Below the Questions List -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtnBelow" onclick="checkAnswers()">Submit</button>
+            <div id="resultBelow" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Declare shuffledQuestions globally
+        let shuffledQuestions = [];
+
+        // Replace the following array with your own questions
+        const questions = [
+    {
+        id: 'q1',
+        question: 'Who was the first Sultan to adopt the title \'Sultan\' with permission from the Abbasid Caliph?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q2',
+        question: 'What was the primary purpose of establishing the \'Chalisa\' by Iltutmish?',
+        options: [
+            { text: 'To build architectural structures', isCorrect: false },
+            { text: 'To promote Persian art and culture', isCorrect: false },
+            { text: 'To strengthen central authority and administrative efficiency', isCorrect: true },
+            { text: 'To organize military campaigns', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q3',
+        question: 'Which dynasty of the Delhi Sultanate is known for the introduction of the Iqta system?',
+        options: [
+            { text: 'Mamluk Dynasty', isCorrect: true },
+            { text: 'Khilji Dynasty', isCorrect: false },
+            { text: 'Tughlaq Dynasty', isCorrect: false },
+            { text: 'Lodi Dynasty', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q4',
+        question: 'What significant architectural contribution did Razia Sultan make during her reign?',
+        options: [
+            { text: 'Completion of Qutub Minar', isCorrect: false },
+            { text: 'Construction of Sultangarhi Mausoleum', isCorrect: false },
+            { text: 'Establishment of Madrasa-e-Muizzi', isCorrect: false },
+            { text: 'None', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q5',
+        question: 'Who was responsible for consolidating the Mamluk Dynasty after the deposition of Aram Shah?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q6',
+        question: 'During whose reign was the Quwwat-ul-Islam Mosque in Ajmer built?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: true },
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q7',
+        question: 'Which Sultan is known for introducing market control regulations to stabilize prices?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q8',
+        question: 'What was the relationship between Razia Sultan and Iltutmish?',
+        options: [
+            { text: 'Son', isCorrect: false },
+            { text: 'Brother', isCorrect: false },
+            { text: 'Daughter', isCorrect: true },
+            { text: 'Nephew', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q9',
+        question: 'Which dynasty succeeded the Tughlaq Dynasty in the Delhi Sultanate?',
+        options: [
+            { text: 'Mamluk Dynasty', isCorrect: false },
+            { text: 'Khilji Dynasty', isCorrect: false },
+            { text: 'Sayyid Dynasty', isCorrect: true },
+            { text: 'Lodi Dynasty', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q10',
+        question: 'Who was the first and only female Sultan of Delhi?',
+        options: [
+            { text: 'Razia Sultan', isCorrect: true },
+            { text: 'Sultana Razia', isCorrect: false },
+            { text: 'Malika Razia', isCorrect: false },
+            { text: 'Qutbuddin Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q11',
+        question: 'What was the main reason for Razia Sultan\'s downfall?',
+        options: [
+            { text: 'Invasion by the Mongols', isCorrect: false },
+            { text: 'Economic instability', isCorrect: false },
+            { text: 'Opposition from Turkish nobles', isCorrect: true },
+            { text: 'Natural disasters', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q12',
+        question: 'Which architectural structure is considered the first Islamic mausoleum in India?',
+        options: [
+            { text: 'Qutub Minar', isCorrect: false },
+            { text: 'Sultangarhi Mausoleum', isCorrect: true },
+            { text: 'Taj Mahal', isCorrect: false },
+            { text: 'Humayun\'s Tomb', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q13',
+        question: 'Who was appointed as the Diwan-i-Ariz by Ghiyasuddin Balban?',
+        options: [
+            { text: 'Etigin', isCorrect: false },
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: false },
+            { text: 'Imad-ul-Mulk', isCorrect: true },
+            { text: 'Nusrat Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q14',
+        question: 'What policy did Ghiyasuddin Balban implement to maintain law and order?',
+        options: [
+            { text: 'Iqta System', isCorrect: false },
+            { text: 'Blood and Sword', isCorrect: true },
+            { text: 'Land Reforms', isCorrect: false },
+            { text: 'Trade Regulations', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q15',
+        question: 'Who was the founder of the Khilji Dynasty?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q16',
+        question: 'Which Sultan is known for completing the construction of the Qutub Minar?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q17',
+        question: 'During whose reign did the Mongol invasion of 1241 AD occur?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+            { text: 'Muizuddin Bahram Shah', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q18',
+        question: 'What was the significance of the Iqta system introduced by Iltutmish?',
+        options: [
+            { text: 'It centralized military power', isCorrect: false },
+            { text: 'It standardized coinage', isCorrect: false },
+            { text: 'It granted land to officers in exchange for services', isCorrect: true },
+            { text: 'It promoted Persian art and culture', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q19',
+        question: 'Who was Muizuddin Kaiqubad in relation to Ghiyasuddin Balban?',
+        options: [
+            { text: 'Son', isCorrect: false },
+            { text: 'Brother', isCorrect: false },
+            { text: 'Grandson', isCorrect: true },
+            { text: 'Nephew', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q20',
+        question: 'Which position held significant authority and acted as a guardian over the Sultanate during Bahram Shah\'s reign?',
+        options: [
+            { text: 'Diwan-i-Ariz', isCorrect: false },
+            { text: 'Naib-e-Mamlakat', isCorrect: true },
+            { text: 'Wazir', isCorrect: false },
+            { text: 'Iqtadar', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q21',
+        question: 'What was the primary role of the \'Chalisa\' in the Delhi Sultanate\'s administration?',
+        options: [
+            { text: 'Military training', isCorrect: false },
+            { text: 'Religious ceremonies', isCorrect: false },
+            { text: 'Council of forty elite nobles', isCorrect: true },
+            { text: 'Architectural planning', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q22',
+        question: 'Which Sultan moved the capital of the Delhi Sultanate from Lahore to Delhi?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q23',
+        question: 'Who was the last Sultan of the Delhi Sultanate before the establishment of the Mughal Empire?',
+        options: [
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q24',
+        question: 'What was the name of the educational institution established by Iltutmish in Delhi?',
+        options: [
+            { text: 'Madrasa-e-Alam', isCorrect: false },
+            { text: 'Madrasa-e-Muizzi', isCorrect: true },
+            { text: 'Madrasa-e-Tughlaq', isCorrect: false },
+            { text: 'Madrasa-e-Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q25',
+        question: 'Which Sultan was known for his administrative reforms and military conquests, ruling for 30 years?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q26',
+        question: 'Who wrote the historical work \'Tabaqat-e-Nasiri\' dedicated to Nasiruddin Mahmud?',
+        options: [
+            { text: 'Minhajuddin Siraj', isCorrect: true },
+            { text: 'Elphinstone', isCorrect: false },
+            { text: 'Khizr Khan', isCorrect: false },
+            { text: 'Amir Khusrau', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q27',
+        question: 'What title did Ghiyasuddin Balban adopt to emphasize the divine aspect of kingship?',
+        options: [
+            { text: 'Sultan', isCorrect: false },
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Zill-e Ilahi', isCorrect: true },
+            { text: 'Ulugh Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q28',
+        question: 'Which Iranian festival did Ghiyasuddin Balban start celebrating in his court to enhance its grandeur?',
+        options: [
+            { text: 'Eid-ul-Fitr', isCorrect: false },
+            { text: 'Muharram', isCorrect: false },
+            { text: 'Nauroz', isCorrect: true },
+            { text: 'Basant', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q29',
+        question: 'Who was the first Naib-e-Mamlakat appointed by the Turkish nobles during Bahram Shah\'s reign?',
+        options: [
+            { text: 'Imad-ul-Mulk', isCorrect: false },
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: false },
+            { text: 'Etigin (Atigin)', isCorrect: true },
+            { text: 'Nusrat Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q30',
+        question: 'What were the silver and copper coins introduced by Iltutmish called?',
+        options: [
+            { text: 'Dinar and Dirham', isCorrect: false },
+            { text: 'Tanka and Jital', isCorrect: true },
+            { text: 'Rupiya and Paisa', isCorrect: false },
+            { text: 'Shekel and Dinar', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q31',
+        question: 'Which Sultan is considered the \'Father of Tomb Building\' in India?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q32',
+        question: 'Who declared himself Sultan after the death of Nasiruddin Mahmud?',
+        options: [
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Kai Khusrau', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q33',
+        question: 'What was the main function of the \'Amir-i-Akhur\' appointed by Razia Sultan?',
+        options: [
+            { text: 'Minister of Finance', isCorrect: false },
+            { text: 'Master of the Horse', isCorrect: true },
+            { text: 'Minister of War', isCorrect: false },
+            { text: 'Chief Architect', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q34',
+        question: 'Which Sultan faced a rebellion led by Malik Ikhtiaruddin Altunia?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Muizuddin Bahram Shah', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q35',
+        question: 'What was the outcome of Razia Sultan\'s battle to reclaim the throne with Altunia?',
+        options: [
+            { text: 'She successfully reclaimed the throne', isCorrect: false },
+            { text: 'She was defeated by Bahram Shah', isCorrect: true },
+            { text: 'The battle was inconclusive', isCorrect: false },
+            { text: 'Altunia became the new Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q36',
+        question: 'Who was the first ruler of the Sayyid Dynasty?',
+        options: [
+            { text: 'Khizr Khan', isCorrect: true },
+            { text: 'Shamsuddin Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q37',
+        question: 'Which Sultan introduced strict measures to maintain law and order, known as the \'Blood and Sword\' policy?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q38',
+        question: 'What was the main reason for establishing the position of \'Naib-e-Mamlakat\'?',
+        options: [
+            { text: 'To manage trade', isCorrect: false },
+            { text: 'To oversee religious affairs', isCorrect: false },
+            { text: 'To secure the power of Turkish nobles', isCorrect: true },
+            { text: 'To build architectural structures', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q39',
+        question: 'Who was the ruler of Ranthambore defeated during Alauddin Khilji\'s campaign?',
+        options: [
+            { text: 'Ratan Singh', isCorrect: false },
+            { text: 'Hammir Dev', isCorrect: true },
+            { text: 'Raikaran', isCorrect: false },
+            { text: 'Ramchandra Dev', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q40',
+        question: 'What was the main administrative system introduced by Iltutmish to grant land to officials?',
+        options: [
+            { text: 'Mansabdari System', isCorrect: false },
+            { text: 'Iqta System', isCorrect: true },
+            { text: 'Zamindari System', isCorrect: false },
+            { text: 'Jagirdari System', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q41',
+        question: 'Which Sultan is known for his military campaigns that expanded the Delhi Sultanate?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q42',
+        question: 'What title was bestowed upon Balban by Nasiruddin Mahmud?',
+        options: [
+            { text: 'Sultan', isCorrect: false },
+            { text: 'Ulugh Khan', isCorrect: true },
+            { text: 'Amir-i-Akhur', isCorrect: false },
+            { text: 'Zill-e Ilahi', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q43',
+        question: 'Who was the first ruler of the Lodi Dynasty?',
+        options: [
+            { text: 'Sikandar Lodi', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q44',
+        question: 'What significant event occurred during Alauddin Khilji\'s Gujarat Campaign?',
+        options: [
+            { text: 'Capture of Padmavati', isCorrect: false },
+            { text: 'Acquisition of Malik Kafur', isCorrect: true },
+            { text: 'Completion of Qutub Minar', isCorrect: false },
+            { text: 'Establishment of Madrasa-e-Muizzi', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q45',
+        question: 'Who was the last ruler of the Khilji Dynasty?',
+        options: [
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Shihabuddin Umar Khilji', isCorrect: false },
+            { text: 'Qutbuddin Mubarak Shah Khilji', isCorrect: false },
+            { text: 'Nasiruddin Khusro Shah', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q46',
+        question: 'What was the relationship between Nasiruddin Mahmud and Ghiyasuddin Balban?',
+        options: [
+            { text: 'Father and son', isCorrect: false },
+            { text: 'Cousins', isCorrect: false },
+            { text: 'Father-in-law and son-in-law', isCorrect: true },
+            { text: 'Brothers', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q47',
+        question: 'Which Sultan is known for establishing the Sultangarhi Mausoleum?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q48',
+        question: 'What was the main purpose of the Madrasa-e-Muizzi established by Iltutmish?',
+        options: [
+            { text: 'Military training', isCorrect: false },
+            { text: 'Architectural design', isCorrect: false },
+            { text: 'Promoting learning and scholarship', isCorrect: true },
+            { text: 'Religious ceremonies', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q49',
+        question: 'Who was appointed as the Sultan by Turkish nobles after the death of Balban?',
+        options: [
+            { text: 'Kai Khusrau', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: true },
+            { text: 'Bahram Shah', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q50',
+        question: 'What was the main impact of Ghiyasuddin Balban\'s reign on the Delhi Sultanate?',
+        options: [
+            { text: 'Expansion of territories', isCorrect: false },
+            { text: 'Introduction of the Iqta system', isCorrect: false },
+            { text: 'Strengthening through strict policies and centralized power', isCorrect: true },
+            { text: 'Establishment of new trade routes', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q51',
+        question: 'What does the name \'Iltutmish\' mean?',
+        options: [
+            { text: 'Lord of the Realm', isCorrect: false },
+            { text: 'Shadow of the Empire', isCorrect: false },
+            { text: 'Lord of the Empire', isCorrect: true },
+            { text: 'Protector of the Kingdom', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q52',
+        question: 'To which Turkic tribe did Iltutmish belong?',
+        options: [
+            { text: 'Seljuk Turks', isCorrect: false },
+            { text: 'Ilbari Turks', isCorrect: true },
+            { text: 'Ghaznavid Turks', isCorrect: false },
+            { text: 'Khwarazmian Turks', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q53',
+        question: 'Who was Iltutmish\'s father?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Ilam Khan', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q54',
+        question: 'Why is Iltutmish considered the \'real founder of the Delhi Sultanate\'?',
+        options: [
+            { text: 'He built the first mosque in Delhi', isCorrect: false },
+            { text: 'He consolidated the Sultanate\'s foundations and established effective administrative systems', isCorrect: true },
+            { text: 'He introduced the Iqta system', isCorrect: false },
+            { text: 'He defeated the Mongols single-handedly', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q55',
+        question: 'Who was Iltutmish originally a slave to?',
+        options: [
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Qutbuddin Aibak', isCorrect: true },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q56',
+        question: 'In which year was Iltutmish appointed as the Governor of Badaun?',
+        options: [
+            { text: '1205 AD', isCorrect: true },
+            { text: '1211 AD', isCorrect: false },
+            { text: '1208 AD', isCorrect: false },
+            { text: '1220 AD', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q57',
+        question: 'Whom did Iltutmish marry to strengthen his political position?',
+        options: [
+            { text: 'Daughter of Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Daughter of Qutbuddin Aibak', isCorrect: true },
+            { text: 'Daughter of Alauddin Khilji', isCorrect: false },
+            { text: 'Daughter of Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q58',
+        question: 'Which title did Iltutmish adopt after becoming Sultan?',
+        options: [
+            { text: 'Malik', isCorrect: false },
+            { text: 'Sipahsalar', isCorrect: false },
+            { text: 'Sultan', isCorrect: true },
+            { text: 'Amir', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q59',
+        question: 'From which city did Iltutmish shift the capital to Delhi?',
+        options: [
+            { text: 'Lahore', isCorrect: true },
+            { text: 'Agra', isCorrect: false },
+            { text: 'Ajmer', isCorrect: false },
+            { text: 'Badaun', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q60',
+        question: 'Which Caliph recognized Iltutmish\'s authority, legitimizing his rule?',
+        options: [
+            { text: 'Caliph Al-Mustansir Billah', isCorrect: true },
+            { text: 'Caliph Al-Nasir', isCorrect: false },
+            { text: 'Caliph Al-Mustakfi', isCorrect: false },
+            { text: 'Caliph Al-Mustadi', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q61',
+        question: 'What was the purpose of establishing the \'Chalisa\' by Iltutmish?',
+        options: [
+            { text: 'To build religious institutions', isCorrect: false },
+            { text: 'To create a group of forty elite Turkic nobles', isCorrect: true },
+            { text: 'To manage trade routes', isCorrect: false },
+            { text: 'To oversee architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q62',
+        question: 'What system did Iltutmish introduce to grant land to officials in exchange for services?',
+        options: [
+            { text: 'Mansabdari System', isCorrect: false },
+            { text: 'Iqta System', isCorrect: true },
+            { text: 'Zamindari System', isCorrect: false },
+            { text: 'Jagirdari System', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q63',
+        question: 'What were the names of the silver and copper coins introduced by Iltutmish?',
+        options: [
+            { text: 'Dinar and Dirham', isCorrect: false },
+            { text: 'Tanka and Jital', isCorrect: true },
+            { text: 'Rupiya and Paisa', isCorrect: false },
+            { text: 'Shekel and Dinar', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q64',
+        question: 'Which Sufi saint came to India during Iltutmish\'s reign?',
+        options: [
+            { text: 'Moinuddin Chishti', isCorrect: false },
+            { text: 'Qutbuddin Bakhtiyar Kaki', isCorrect: true },
+            { text: 'Nizamuddin Auliya', isCorrect: false },
+            { text: 'Baba Farid', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q65',
+        question: 'In which year did Iltutmish die?',
+        options: [
+            { text: '1231 AD', isCorrect: false },
+            { text: '1236 AD', isCorrect: true },
+            { text: '1240 AD', isCorrect: false },
+            { text: '1246 AD', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q66',
+        question: 'Who did Iltutmish nominate as his successor?',
+        options: [
+            { text: 'His son, Aram Shah', isCorrect: false },
+            { text: 'His brother', isCorrect: false },
+            { text: 'His daughter, Razia Sultan', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q67',
+        question: 'What significant change did Razia Sultan make to traditional norms?',
+        options: [
+            { text: 'Introduced new architectural styles', isCorrect: false },
+            { text: 'Abandoned the purdah system and wore male attire', isCorrect: true },
+            { text: 'Established the Iqta system', isCorrect: false },
+            { text: 'Moved the capital to Lahore', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q68',
+        question: 'What title did Razia Sultan hold that indicated her authority?',
+        options: [
+            { text: 'Malik', isCorrect: false },
+            { text: 'Sipahsalar', isCorrect: false },
+            { text: 'Jalalat-ud-din', isCorrect: true },
+            { text: 'Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q69',
+        question: 'Whom did Razia Sultan appoint as \'Amir-i-Akhur\'?',
+        options: [
+            { text: 'Imad-ul-Mulk', isCorrect: false },
+            { text: 'Etigin', isCorrect: false },
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: true },
+            { text: 'Nusrat Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q70',
+        question: 'Which governor rebelled against Razia Sultan, leading to her eventual downfall?',
+        options: [
+            { text: 'Imad-ul-Mulk', isCorrect: false },
+            { text: 'Malik Ikhtiaruddin Altunia', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Etigin', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q71',
+        question: 'What was the outcome of Razia Sultan\'s marriage to Altunia?',
+        options: [
+            { text: 'They successfully reclaimed the throne', isCorrect: false },
+            { text: 'They were defeated by Bahram Shah', isCorrect: true },
+            { text: 'Razia was deposed', isCorrect: false },
+            { text: 'Altunia became the new Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q72',
+        question: 'In which year and where did Razia Sultan die?',
+        options: [
+            { text: '1240 AD, near Kaithal, Haryana', isCorrect: true },
+            { text: '1242 AD, Delhi', isCorrect: false },
+            { text: '1236 AD, Lahore', isCorrect: false },
+            { text: '1246 AD, Ajmer', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q73',
+        question: 'Which historian wrote that Razia Sultan\'s virtues were deemed worthless because she was not born a man?',
+        options: [
+            { text: 'Minhaj-i-Siraj', isCorrect: true },
+            { text: 'Elphinstone', isCorrect: false },
+            { text: 'Amir Khusrau', isCorrect: false },
+            { text: 'Al-Biruni', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q74',
+        question: 'What did historian Elphinstone remark about Razia Sultan?',
+        options: [
+            { text: 'She was the greatest ruler of India', isCorrect: false },
+            { text: 'Her reign was short and ineffective', isCorrect: false },
+            { text: 'Had she been a man, she might have been one of the greatest rulers of India', isCorrect: true },
+            { text: 'She introduced significant administrative reforms', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q75',
+        question: 'Which mausoleum is considered the first Islamic mausoleum in India?',
+        options: [
+            { text: 'Qutub Minar', isCorrect: false },
+            { text: 'Sultangarhi Mausoleum', isCorrect: true },
+            { text: 'Humayun\'s Tomb', isCorrect: false },
+            { text: 'Taj Mahal', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q76',
+        question: 'For whom was the Sultangarhi Mausoleum built?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: true },
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q77',
+        question: 'What educational institution did Iltutmish establish in Delhi?',
+        options: [
+            { text: 'Madrasa-e-Alam', isCorrect: false },
+            { text: 'Madrasa-e-Muizzi', isCorrect: true },
+            { text: 'Madrasa-e-Tughlaq', isCorrect: false },
+            { text: 'Madrasa-e-Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q78',
+        question: 'How did Iltutmish strengthen the Delhi Sultanate?',
+        options: [
+            { text: 'By building more mosques', isCorrect: false },
+            { text: 'By consolidating territories, centralizing administration, and implementing reforms', isCorrect: true },
+            { text: 'By promoting trade with Europe', isCorrect: false },
+            { text: 'By abolishing the Iqta system', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q79',
+        question: 'What was Razia Sultan\'s impact on gender norms of her time?',
+        options: [
+            { text: 'She enforced stricter gender roles', isCorrect: false },
+            { text: 'She remained confined to traditional female roles', isCorrect: false },
+            { text: 'She challenged gender norms by ruling as a female Sultan and displaying capabilities equal to male rulers', isCorrect: true },
+            { text: 'She banned women from holding official positions', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q80',
+        question: 'Which system did Iltutmish use to grant land to his officers?',
+        options: [
+            { text: 'Mansabdari System', isCorrect: false },
+            { text: 'Iqta System', isCorrect: true },
+            { text: 'Zamindari System', isCorrect: false },
+            { text: 'Jagirdari System', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q81',
+        question: 'Who succeeded Iltutmish immediately after his death?',
+        options: [
+            { text: 'His son, Aram Shah', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'His daughter, Razia Sultan', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q82',
+        question: 'Why did the Turkish nobles oppose Razia Sultan?',
+        options: [
+            { text: 'Because she was too lenient', isCorrect: false },
+            { text: 'Due to her favoritism towards non-Turkish officials and breaking traditional gender roles', isCorrect: true },
+            { text: 'Because she introduced heavy taxes', isCorrect: false },
+            { text: 'Because she moved the capital to Lahore', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q83',
+        question: 'What strategy did Iltutmish use to avoid conflict with the Mongols?',
+        options: [
+            { text: 'Diplomatic alliances', isCorrect: false },
+            { text: 'Building a strong navy', isCorrect: false },
+            { text: 'Military confrontation', isCorrect: false },
+            { text: 'Diplomatic refusal of asylum to Jalaluddin Mangabarni', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q84',
+        question: 'What was the title given to Ghiyasuddin Balban by Nasiruddin Mahmud?',
+        options: [
+            { text: 'Sultan', isCorrect: false },
+            { text: 'Ulugh Khan', isCorrect: true },
+            { text: 'Amir-i-Akhur', isCorrect: false },
+            { text: 'Zill-e Ilahi', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q85',
+        question: 'What does the title \'Zill-e Ilahi\' mean, and who adopted it?',
+        options: [
+            { text: 'Shadow of the Sultan; Razia Sultan', isCorrect: false },
+            { text: 'Shadow of God; Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Protector of Islam; Iltutmish', isCorrect: false },
+            { text: 'Master of Horses; Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q86',
+        question: 'Which court practices did Balban introduce to reinforce royal supremacy?',
+        options: [
+            { text: 'Prostration before the Sultan and kissing the Sultan\'s feet', isCorrect: true },
+            { text: 'Holding open markets', isCorrect: false },
+            { text: 'Allowing religious freedom', isCorrect: false },
+            { text: 'Promoting local artisans', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q87',
+        question: 'Which Iranian festival did Balban start celebrating in his court?',
+        options: [
+            { text: 'Eid', isCorrect: false },
+            { text: 'Muharram', isCorrect: false },
+            { text: 'Nauroz', isCorrect: true },
+            { text: 'Basant', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q88',
+        question: 'What was the Chalisa, and what did Balban do to it?',
+        options: [
+            { text: 'A group of forty powerful Turkish nobles; Balban dissolved it', isCorrect: true },
+            { text: 'A religious festival; Balban banned it', isCorrect: false },
+            { text: 'An architectural style; Balban promoted it', isCorrect: false },
+            { text: 'A type of coinage; Balban standardized it', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q89',
+        question: 'Who was appointed as Diwan-i-Ariz by Balban?',
+        options: [
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: false },
+            { text: 'Imad-ul-Mulk', isCorrect: true },
+            { text: 'Etigin', isCorrect: false },
+            { text: 'Nusrat Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q90',
+        question: 'What policy did Balban implement to reorganize and strengthen the army?',
+        options: [
+            { text: 'Mansabdari System', isCorrect: false },
+            { text: 'Blood and Sword', isCorrect: true },
+            { text: 'Iqta System', isCorrect: false },
+            { text: 'Zamindari System', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q91',
+        question: 'During whose reign was the Mongol invasion of 1241 AD prevented?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+            { text: 'Muizuddin Bahram Shah', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q92',
+        question: 'Who was the first Naib-e-Mamlakat appointed by the Turkish nobles during Bahram Shah\'s reign?',
+        options: [
+            { text: 'Imad-ul-Mulk', isCorrect: false },
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: false },
+            { text: 'Etigin (Atigin)', isCorrect: true },
+            { text: 'Nusrat Khan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q93',
+        question: 'Which Sultan is known for reorganizing the army and appointing Imad-ul-Mulk as Diwan-i-Ariz?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q94',
+        question: 'What was the main administrative role of the Diwan-i-Wizarat?',
+        options: [
+            { text: 'Overseeing military affairs', isCorrect: false },
+            { text: 'Managing the state\'s finances', isCorrect: true },
+            { text: 'Handling foreign relations', isCorrect: false },
+            { text: 'Supervising architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q95',
+        question: 'Who was the first and only female Sultan of Delhi?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: true },
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q96',
+        question: 'What was the main cause of Razia Sultan\'s downfall?',
+        options: [
+            { text: 'Invasion by the Mongols', isCorrect: false },
+            { text: 'Economic instability', isCorrect: false },
+            { text: 'Rebellion by Altunia and opposition from nobles', isCorrect: true },
+            { text: 'Natural disasters', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q97',
+        question: 'Which Sultan is credited with completing the construction of the Qutub Minar?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q98',
+        question: 'Who was the last Sultan of the Khilji Dynasty?',
+        options: [
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Shihabuddin Umar Khilji', isCorrect: false },
+            { text: 'Qutbuddin Mubarak Shah Khilji', isCorrect: false },
+            { text: 'Nasiruddin Khusro Shah', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q99',
+        question: 'What was the main role of the \'Amir-i-Akhur\' appointed by Razia Sultan?',
+        options: [
+            { text: 'Minister of Finance', isCorrect: false },
+            { text: 'Master of the Horse', isCorrect: true },
+            { text: 'Minister of War', isCorrect: false },
+            { text: 'Chief Architect', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q100',
+        question: 'Who was responsible for consolidating the Delhi Sultanate after the deposition of Aram Shah?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q101',
+        question: 'What was the main function of the \'Naib-e-Mamlakat\' during Bahram Shah\'s reign?',
+        options: [
+            { text: 'Managing trade', isCorrect: false },
+            { text: 'Overseeing religious affairs', isCorrect: false },
+            { text: 'Acting as Deputy of the Kingdom with significant authority', isCorrect: true },
+            { text: 'Supervising architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q102',
+        question: 'Which Sultan was known for his administrative reforms and patronage of scholars, as evidenced by the dedication of \'Tabaqat-e-Nasiri\'?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q103',
+        question: 'What was the primary reason for establishing mints in Delhi during Iltutmish\'s reign?',
+        options: [
+            { text: 'To fund military campaigns', isCorrect: false },
+            { text: 'To promote trade with Europe', isCorrect: false },
+            { text: 'To standardize and control the coinage system', isCorrect: true },
+            { text: 'To support architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q104',
+        question: 'Which title was adopted by Ghiyasuddin Balban to emphasize the divine aspect of his kingship?',
+        options: [
+            { text: 'Sultan', isCorrect: false },
+            { text: 'Ulugh Khan', isCorrect: false },
+            { text: 'Zill-e Ilahi', isCorrect: true },
+            { text: 'Amir-i-Akhur', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q105',
+        question: 'Who was the Sultan of Delhi when the Quwwat-ul-Islam Mosque was built?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Qutbuddin Aibak', isCorrect: true },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q106',
+        question: 'What significant event marked the end of Ghiyasuddin Balban\'s reign?',
+        options: [
+            { text: 'Mongol invasion', isCorrect: false },
+            { text: 'Death in 1286 AD', isCorrect: true },
+            { text: 'Rebellion by Altunia', isCorrect: false },
+            { text: 'Introduction of the Iqta system', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q107',
+        question: 'Which educational institution did Iltutmish establish to promote learning and scholarship?',
+        options: [
+            { text: 'Madrasa-e-Alam', isCorrect: false },
+            { text: 'Madrasa-e-Tughlaq', isCorrect: false },
+            { text: 'Madrasa-e-Muizzi', isCorrect: true },
+            { text: 'Madrasa-e-Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q108',
+        question: 'Who was the first ruler of the Sayyid Dynasty?',
+        options: [
+            { text: 'Khizr Khan', isCorrect: true },
+            { text: 'Shamsuddin Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q109',
+        question: 'Which Sultan is known for reorganizing the army and implementing the \'Blood and Sword\' policy?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q110',
+        question: 'What was the main impact of Ghiyasuddin Balban\'s reign on the Delhi Sultanate?',
+        options: [
+            { text: 'Expansion of territories', isCorrect: false },
+            { text: 'Introduction of the Iqta system', isCorrect: false },
+            { text: 'Strengthening through strict policies and centralized power', isCorrect: true },
+            { text: 'Establishment of new trade routes', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q111',
+        question: 'Which Sultan introduced the use of advanced weaponry and strategic forts in the Delhi Sultanate?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: true },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q112',
+        question: 'Who was the first and only female Sultan of Delhi?',
+        options: [
+            { text: 'Razia Sultan', isCorrect: true },
+            { text: 'Sultana Razia', isCorrect: false },
+            { text: 'Malika Razia', isCorrect: false },
+            { text: 'Qutbuddin Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q113',
+        question: 'What was the primary function of the \'Chalisa\' in the administration of the Delhi Sultanate?',
+        options: [
+            { text: 'Military training', isCorrect: false },
+            { text: 'Religious ceremonies', isCorrect: false },
+            { text: 'Council of forty elite Turkic nobles', isCorrect: true },
+            { text: 'Architectural planning', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q114',
+        question: 'Which Sultan is known for his administrative efficiency and promotion of meritocracy over nobility?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q115',
+        question: 'Who declared himself Sultan after the death of Nasiruddin Mahmud?',
+        options: [
+            { text: 'Kai Khusrau', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Bahram Shah', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q116',
+        question: 'What was the main role of the \'Diwan-i-Wizarat\' in the Delhi Sultanate\'s administration?',
+        options: [
+            { text: 'Managing military affairs', isCorrect: false },
+            { text: 'Overseeing religious institutions', isCorrect: false },
+            { text: 'Managing the state\'s finances', isCorrect: true },
+            { text: 'Supervising architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q117',
+        question: 'Which dynasty of the Delhi Sultanate was the longest ruling?',
+        options: [
+            { text: 'Mamluk Dynasty', isCorrect: false },
+            { text: 'Khilji Dynasty', isCorrect: false },
+            { text: 'Tughlaq Dynasty', isCorrect: true },
+            { text: 'Lodi Dynasty', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q118',
+        question: 'What was the significance of the Qutub Minar during the Delhi Sultanate?',
+        options: [
+            { text: 'It was the first mosque built in Delhi', isCorrect: false },
+            { text: 'It symbolized Indo-Islamic architecture and was a prominent landmark', isCorrect: true },
+            { text: 'It served as the main administrative building', isCorrect: false },
+            { text: 'It was used as a military fort', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q119',
+        question: 'Who was the ruler responsible for the completion of the Qutub Minar?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q120',
+        question: 'Which Sultan moved the capital of the Delhi Sultanate from Lahore to Delhi?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q121',
+        question: 'What was the main purpose of the \'Blood and Sword\' policy implemented by Ghiyasuddin Balban?',
+        options: [
+            { text: 'To promote trade', isCorrect: false },
+            { text: 'To maintain law and order by suppressing rebellions ruthlessly', isCorrect: true },
+            { text: 'To build architectural structures', isCorrect: false },
+            { text: 'To support agricultural development', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q122',
+        question: 'Who was the ruler of Ranthambore defeated during Alauddin Khilji\'s campaign?',
+        options: [
+            { text: 'Ratan Singh', isCorrect: false },
+            { text: 'Hammir Dev', isCorrect: true },
+            { text: 'Raikaran', isCorrect: false },
+            { text: 'Ramchandra Dev', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q123',
+        question: 'What was the outcome of Razia Sultan\'s battle to reclaim the throne with Altunia?',
+        options: [
+            { text: 'She successfully reclaimed the throne', isCorrect: false },
+            { text: 'She was defeated by Bahram Shah', isCorrect: true },
+            { text: 'The battle was inconclusive', isCorrect: false },
+            { text: 'Altunia became the new Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q124',
+        question: 'Who was the last Sultan of the Khilji Dynasty?',
+        options: [
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Shihabuddin Umar Khilji', isCorrect: false },
+            { text: 'Qutbuddin Mubarak Shah Khilji', isCorrect: false },
+            { text: 'Nasiruddin Khusro Shah', isCorrect: true },
+        ]
+    },
+    {
+        id: 'q125',
+        question: 'What was the main administrative system introduced by Iltutmish to grant land to officials?',
+        options: [
+            { text: 'Mansabdari System', isCorrect: false },
+            { text: 'Iqta System', isCorrect: true },
+            { text: 'Zamindari System', isCorrect: false },
+            { text: 'Jagirdari System', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q126',
+        question: 'Who consolidated the Delhi Sultanate after the deposition of Aram Shah?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q127',
+        question: 'Which Sultan was responsible for establishing the Madrasa-e-Muizzi in Delhi?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q128',
+        question: 'Who was the father of Razia Sultan?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q129',
+        question: 'What was the main reason for Ghiyasuddin Balban\'s policies of \'Sijda\' and \'Paibos\'?',
+        options: [
+            { text: 'To promote religious tolerance', isCorrect: false },
+            { text: 'To reinforce royal supremacy and authority', isCorrect: true },
+            { text: 'To encourage trade', isCorrect: false },
+            { text: 'To develop architectural projects', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q130',
+        question: 'Which title means \'Master of the Horse\' and was held by Malik Jamaluddin Yaqut?',
+        options: [
+            { text: 'Diwan-i-Ariz', isCorrect: false },
+            { text: 'Amir-i-Akhur', isCorrect: true },
+            { text: 'Naib-e-Mamlakat', isCorrect: false },
+            { text: 'Wazir', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q131',
+        question: 'Who was the first ruler of the Lodi Dynasty?',
+        options: [
+            { text: 'Sikandar Lodi', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q132',
+        question: 'Which Sultan is known for his military campaigns and administrative reforms, ruling for 30 years?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q133',
+        question: 'Who succeeded Nasiruddin Mahmud after his death?',
+        options: [
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false },
+            { text: 'Bahram Shah', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q134',
+        question: 'What was the main role of the \'Diwan-i-Ariz\' in the Delhi Sultanate?',
+        options: [
+            { text: 'Managing finances', isCorrect: false },
+            { text: 'Overseeing military affairs', isCorrect: true },
+            { text: 'Supervising architectural projects', isCorrect: false },
+            { text: 'Handling religious matters', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q135',
+        question: 'Which educational institution did Iltutmish establish to promote learning and scholarship?',
+        options: [
+            { text: 'Madrasa-e-Alam', isCorrect: false },
+            { text: 'Madrasa-e-Muizzi', isCorrect: true },
+            { text: 'Madrasa-e-Tughlaq', isCorrect: false },
+            { text: 'Madrasa-e-Razia', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q136',
+        question: 'What significant event marked the beginning of Ghiyasuddin Balban\'s reign?',
+        options: [
+            { text: 'Establishment of the Chalisa', isCorrect: false },
+            { text: 'Dissolution of the Chalisa', isCorrect: true },
+            { text: 'Introduction of the Iqta system', isCorrect: false },
+            { text: 'Completion of the Qutub Minar', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q137',
+        question: 'Who was the ruler responsible for introducing the \'Blood and Sword\' policy?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: true },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q138',
+        question: 'Which Sultan was known for his pious nature and habit of copying the Quran?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q139',
+        question: 'Who was the Sultan when the Sultangarhi Mausoleum was built?',
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q140',
+        question: 'Which Sultan was responsible for moving the capital to Delhi and receiving investiture from the Caliph of Baghdad?',
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+        ]
+    },
+    {
+        id: 'q141',
+        question: "What was the main function of the 'Amir-i-Akhur' appointed by Razia Sultan?",
+        options: [
+            { text: 'Minister of Finance', isCorrect: false },
+            { text: 'Master of the Horse', isCorrect: true },
+            { text: 'Minister of War', isCorrect: false },
+            { text: 'Chief Architect', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q142',
+        question: "Who was the last ruler of the Khilji Dynasty?",
+        options: [
+            { text: 'Alauddin Khilji', isCorrect: false },
+            { text: 'Shihabuddin Umar Khilji', isCorrect: false },
+            { text: 'Qutbuddin Mubarak Shah Khilji', isCorrect: false },
+            { text: 'Nasiruddin Khusro Shah', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q143',
+        question: "Which Sultan is known for his military campaigns that expanded the Delhi Sultanate?",
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Alauddin Khilji', isCorrect: true },
+            { text: 'Muizuddin Kaiqubad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q144',
+        question: "What was the main administrative role of the 'Diwan-i-Wizarat'?",
+        options: [
+            { text: 'Managing military affairs', isCorrect: false },
+            { text: 'Overseeing religious institutions', isCorrect: false },
+            { text: "Managing the state's finances", isCorrect: true },
+            { text: 'Supervising architectural projects', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q145',
+        question: "Who was the first Sultan to have the Khutba read in his name?",
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q146',
+        question: "What was the significance of the Quwwat-ul-Islam Mosque in Ajmer?",
+        options: [
+            { text: 'It was the first mosque built in pure Turkish style in India', isCorrect: true },
+            { text: 'It served as the main administrative building', isCorrect: false },
+            { text: 'It was the personal mosque of Razia Sultan', isCorrect: false },
+            { text: 'It was used as a military fort', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q147',
+        question: "Who was the first Naib-e-Mamlakat appointed by the Turkish nobles during Bahram Shah's reign?",
+        options: [
+            { text: 'Imad-ul-Mulk', isCorrect: false },
+            { text: 'Malik Jamaluddin Yaqut', isCorrect: false },
+            { text: 'Etigin (Atigin)', isCorrect: true },
+            { text: 'Nusrat Khan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q148',
+        question: "What was the main purpose of the Madrasa-e-Muizzi established by Iltutmish?",
+        options: [
+            { text: 'Military training', isCorrect: false },
+            { text: 'Religious education and scholarship', isCorrect: true },
+            { text: 'Architectural design', isCorrect: false },
+            { text: 'Trade management', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q149',
+        question: "Who was the ruler when the Mongol invasion of 1241 AD occurred?",
+        options: [
+            { text: 'Iltutmish', isCorrect: false },
+            { text: 'Razia Sultan', isCorrect: false },
+            { text: 'Muizuddin Bahram Shah', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q150',
+        question: "Which Sultan is known for completing the Qutub Minar?",
+        options: [
+            { text: 'Qutbuddin Aibak', isCorrect: false },
+            { text: 'Iltutmish', isCorrect: true },
+            { text: 'Ghiyasuddin Balban', isCorrect: false },
+            { text: 'Nasiruddin Mahmud', isCorrect: false }
+        ]
+    }
+];
+
+        // Function to shuffle an array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to render the questions dynamically
+        function renderQuestions() {
+            const quizForm = document.getElementById('quizForm');
+            const questionsArray = getQuestions(); // Retrieve the questions array
+            if (!questionsArray || !Array.isArray(questionsArray) || questionsArray.length < 25) {
+                quizForm.innerHTML = '<p>Insufficient questions available. Please ensure there are at least 25 questions in the questions array.</p>';
+                return;
+            }
+
+            // Randomly select 25 questions from the available questions
+            const selectedQuestions = getRandomQuestions(questionsArray, 25);
+
+            // Assign shuffledQuestions to the global variable
+            shuffledQuestions = shuffleArray([...selectedQuestions]); // Create a copy and shuffle
+
+            shuffledQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                questionDiv.id = `question-${index + 1}`; // Assign unique ID
+
+                // Question text
+                const questionText = document.createElement('p');
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                // Options
+                const optionsDiv = document.createElement('div');
+                optionsDiv.classList.add('options');
+
+                // Shuffle options and assign back to q.options
+                q.options = shuffleArray([...q.options]);
+                const shuffledOptions = q.options;
+
+                // Assign labels A, B, C, D dynamically
+                const labels = ['A', 'B', 'C', 'D'];
+
+                shuffledOptions.forEach((option, optIndex) => {
+                    const optionId = `${q.id}_option${optIndex + 1}`; // Unique ID for each option
+
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.id = optionId;
+                    radioInput.name = q.id;
+                    radioInput.value = labels[optIndex]; // Assign label as value
+
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.textContent = `${labels[optIndex]}) ${option.text}`;
+
+                    optionsDiv.appendChild(radioInput);
+                    optionsDiv.appendChild(label);
+
+                    // Add Attempted Class when an option is selected
+                    radioInput.addEventListener('change', function() {
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink && !questionMapLink.classList.contains('correct') && !questionMapLink.classList.contains('incorrect')) {
+                            questionMapLink.classList.add('attempted');
+                        }
+                    });
+                });
+
+                questionDiv.appendChild(optionsDiv);
+
+                // Add Feedback Div Below Options
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.classList.add('feedback');
+                feedbackDiv.id = `feedback-${index + 1}`; // Unique ID for each feedback div
+                questionDiv.appendChild(feedbackDiv);
+
+                quizForm.appendChild(questionDiv);
+            });
+
+            generateQuestionMap(shuffledQuestions.length);
+        }
+
+        // Function to retrieve the questions array
+        function getQuestions() {
+            // Replace this with your actual questions array
+            return questions; // Assuming 'questions' is defined globally
+        }
+
+        // Function to randomly select n questions from the questions array
+        function getRandomQuestions(questionsArray, n) {
+            const shuffled = shuffleArray([...questionsArray]);
+            return shuffled.slice(0, n);
+        }
+
+        // Function to generate the Question Map links
+        function generateQuestionMap(totalQuestions) {
+            const questionLinksDiv = document.getElementById('questionLinks');
+            questionLinksDiv.innerHTML = ''; // Clear any existing links
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const link = document.createElement('a');
+                link.href = `#question-${i}`;
+                link.classList.add('question-link');
+                link.textContent = `Q${i}`;
+
+                questionLinksDiv.appendChild(link);
+            }
+        }
+
+        // Timer Functionality
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            const countdown = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                // Add alert class when time is less than 1 minute
+                if (timer <= 60 && timer > 0) { // 60 seconds = 1 minute
+                    display.classList.add('alert');
+                }
+
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    autoSubmit();
+                }
+            }, 1000);
+        }
+
+        // Function to automatically submit the quiz when time is up
+        function autoSubmit() {
+            alert("Time's up! The quiz will now be submitted.");
+            checkAnswers();
+        }
+
+        // Initialize the quiz on page load
+        window.onload = function () {
+            renderQuestions(); // Render questions on page load
+            const tenMinutes = 60 * 10, // 10 minutes in seconds
+                  display = document.getElementById('timer');
+            startTimer(tenMinutes, display);
+        };
+
+        // Function to check answers and display the result
+        function checkAnswers() {
+            let score = 0;
+            let totalQuestions = shuffledQuestions.length; // Total number of questions
+
+            shuffledQuestions.forEach((q, index) => { // Iterate over each question
+                const selectedOption = document.querySelector(`input[name="${q.id}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index + 1}`);
+                
+                if (selectedOption) {
+                    // Get the selected label (A, B, C, D)
+                    const selectedLabel = selectedOption.value;
+                    // Map label to option index
+                    const labelIndex = ['A', 'B', 'C', 'D'].indexOf(selectedLabel);
+                    if (labelIndex !== -1 && q.options[labelIndex].isCorrect) {
+                        score += 1; // Add 1 mark for correct answer
+
+                        // Mark the question link as correct in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('correct');
+                            questionMapLink.classList.remove('incorrect', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Right';
+                            feedbackDiv.classList.add('right');
+                            feedbackDiv.classList.remove('wrong', 'not-attempted');
+                        }
+                    } else {
+                        score -= 0.5; // Deduct 0.5 marks for incorrect answer
+
+                        // Mark the question link as incorrect in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('incorrect');
+                            questionMapLink.classList.remove('correct', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Wrong';
+                            feedbackDiv.classList.add('wrong');
+                            feedbackDiv.classList.remove('right', 'not-attempted');
+                        }
+                    }
+                } else {
+                    // If the question was not answered, mark as not attempted
+                    const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                    if (questionMapLink) {
+                        // Remove both classes if the question was not answered
+                        questionMapLink.classList.remove('correct', 'incorrect', 'attempted');
+                    }
+
+                    // Update Feedback Below the Question
+                    if (feedbackDiv) {
+                        feedbackDiv.textContent = 'Not Attempted';
+                        feedbackDiv.classList.add('not-attempted');
+                        feedbackDiv.classList.remove('right', 'wrong');
+                    }
+                }
+            });
+
+            // Round the score to one decimal place
+            score = Math.round(score * 10) / 10;
+
+            // Update the result in the Question Map Sidebar
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Update the result below the questions list
+            const resultDivBelow = document.getElementById('resultBelow');
+            resultDivBelow.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Disable all inputs to prevent changes after submission
+            const inputs = document.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            // Disable the submit buttons to prevent multiple submissions
+            const submitButton = document.getElementById('submitBtn');
+            submitButton.disabled = true;
+
+            const submitButtonBelow = document.getElementById('submitBtnBelow');
+            if (submitButtonBelow) {
+                submitButtonBelow.disabled = true;
+            }
+        }
+
+        // Toggle Question Map on small screens
+        const toggleBtn = document.getElementById('toggleQuestionMap');
+        const questionMap = document.getElementById('questionMap');
+
+        toggleBtn.addEventListener('click', () => {
+            questionMap.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
